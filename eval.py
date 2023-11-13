@@ -172,7 +172,7 @@ def evaluate2(pre_path, label_path):
 
 
 if __name__ == '__main__':
-    pre_path = '/home/user/桌面/pytorch_segementation_Remote_Sensing/results/{}/GSGNet_S/'.format(DATASET)
+    pre_path = '/home/user/桌面/pytorch_segementation_Remote_Sensing/results/{}/MSKANet_S/'.format(DATASET)
     label_path = '/media/user/shuju/ISPRS/test/{}/'.format(DATASET)
 
     acc_list, macc_list, mIoU_list, fwIoU_list, classAcc, f1score_list, IoU_list = evaluate1(pre_path, label_path)
