@@ -16,8 +16,8 @@ from toolbox.loss.My_loss.structure_transfer import ST_3
 # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import torch.nn.functional as F
 # teacher model
-from toolbox.models.lyz.Module2.PPNet13_T import SFAFMA_T
-from toolbox.models.lyz.Module2.PPNet13_S import SFAFMA_S
+from toolbox.models.lyz.Module2.MSKA_T import MSKA_T
+from toolbox.models.lyz.Module2.MSKA_S import MSKA_S
 
 
 '''
@@ -72,15 +72,10 @@ criterion_Lovasz = MscLovaszSoftmaxLoss().cuda()
 criterion_bce = nn.BCELoss().cuda()  # 边界监督
 net_s = SFAFMA_S().cuda()
 net_T = SFAFMA_T().cuda()
-# net_T.load_state_dict(torch.load('./weight/SFAFMA_T(ablation_hlg)-Potsdam-loss.pth'))
-# net_T.load_state_dict(torch.load('./weight/SFAFMA_T-Potsdam-loss.pth'))
-net_T.load_state_dict(torch.load('./weight/SFAFMA_T_3-Vaihingen-loss.pth'))
-# net_T.load_state_dict(torch.load('./weight/PPNet_S_KD-Potsdam-loss.pth'))
+# net_T.load_state_dict(torch.load('./weight/MSKA_T(ablation_HCA)-Potsdam-loss.pth'))
+# net_T.load_state_dict(torch.load('./weight/MSKA_T-Potsdam-loss.pth'))
+net_T.load_state_dict(torch.load('./weight/MSKA_T-Vaihingen-loss.pth'))
 optimizer = optim.Adam(net_s.parameters(), lr=1e-4, weight_decay=5e-4)
-
-# resume = True
-# if resume:
-#     net_s.load_state_dict(torch.load('./weight/PPNet_S_KD(ablation_AT)_last-{}-loss.pth'.format(DATASET)))
 
 def accuary(input, target):
     return 100 * float(np.count_nonzero(input == target)) / target.size
@@ -156,7 +151,7 @@ for epoch in range(epochs):
         # print(loss_trans)
         loss9 = criterion_SelfA1(out[10:13],out1[10:13])
         loss10 = criterion_SelfA2(out[12:15],out1[12:15])
-        loss_selfA = (loss9 + loss10) / 2
+        loss_CSA = (loss9 + loss10) / 2
         # print(loss_selfA)
 
         loss11 = criterion_st_1(out1[5],out1[6],out1[7],out[5])
@@ -164,13 +159,13 @@ for epoch in range(epochs):
         loss13 = criterion_st_3(out1[5],out1[6],out1[7],out[7])
         loss14 = criterion_st_4(out1[7],out1[8],out1[9],out[8])
         loss15 = criterion_st_5(out1[7],out1[8],out1[9],out[9])
-        loss_At = (loss11 + loss12 + loss13 + loss14 + loss15) / 5
+        loss_DSA = (loss11 + loss12 + loss13 + loss14 + loss15) / 5
 
 
 
 
 
-        loss =  loss_avg + loss_selfA + loss_At + loss0 + loss_KD * 0.1
+        loss =  loss_avg + loss_DSA + loss_CSA + loss0 + loss_KD * 0.1
 
 
         # 边界监督
@@ -233,11 +228,8 @@ for epoch in range(epochs):
     if acc / len(test_dataloader) >= max(best):
         best.append(acc / len(test_dataloader))
         numloss = epoch
-        torch.save(net.state_dict(), './weight/PPNet_S_KD(paper2)_1-{}-loss.pth'.format(DATASET))
-    torch.save(net.state_dict(), './weight/tem1/PPNet_S_KD(paper2)_{}_last-{}-loss.pth'.format(epoch,DATASET))
+        torch.save(net.state_dict(), './weight/MSKANet_S*-{}-loss.pth'.format(DATASET))
+    torch.save(net.state_dict(), './weight/tem1/MSKANet_S*_{}_last-{}-loss.pth'.format(epoch,DATASET))
 
 
     print(max(best), '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   Accuracy', numloss)
-
-# PPNet_S_KD(CE[S,T]_AT_KL+selfA))
-# PPNet_S_KD(CE[S,T]_KL))
